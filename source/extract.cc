@@ -4,6 +4,8 @@
 #include <fstream>
 #include <memory>
 
+#include "string.h"
+
 constexpr uint32_t chunksize = 1024;
 
 bool extract_mz(std::ifstream &in, std::ostream *out) {
@@ -11,7 +13,7 @@ bool extract_mz(std::ifstream &in, std::ostream *out) {
 
   uint16_t magic;
   in.read(reinterpret_cast<char *>(&magic), 2);
-  if (magic != 0x5a4d) {
+  if (magic != "MZ"_magic2) {
     return false;
   }
 
@@ -40,7 +42,7 @@ bool extract_bw(std::ifstream &in, std::ostream *out) {
 
   uint16_t magic;
   in.read(reinterpret_cast<char *>(&magic), 2);
-  if (magic != 0x5742) {
+  if (magic != "BW"_magic2) {
     return false;
   }
 
@@ -66,7 +68,7 @@ bool extract_mz_le(std::ifstream &in, std::ostream *out) {
 
   uint16_t magic;
   in.read(reinterpret_cast<char *>(&magic), 2);
-  if (magic != 0x5a4d) {
+  if (magic != "MZ"_magic2) {
     return false;
   }
 
@@ -76,7 +78,7 @@ bool extract_mz_le(std::ifstream &in, std::ostream *out) {
 
   in.seekg(lfanew - (in.tellg() - start), std::ios_base::cur);
   in.read(reinterpret_cast<char *>(&magic), 2);
-  if (magic != 0x454c) {
+  if (magic != "LE"_magic2) {
     return false;
   }
 
