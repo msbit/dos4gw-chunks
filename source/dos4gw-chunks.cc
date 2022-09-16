@@ -21,7 +21,7 @@ void extract_chunks(const std::string &input) {
   std::ifstream in(input, std::ios::binary);
   auto start = in.tellg();
 
-  if (magic(in) != 0x5a4d) {
+  if (magic(in) != "MZ"_magic2) {
     fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(),
             in.tellg() - start);
     return;
@@ -36,14 +36,14 @@ void extract_chunks(const std::string &input) {
     return;
   }
 
-  if (magic(in) != 0x5742) {
+  if (magic(in) != "BW"_magic2) {
     fprintf(stderr, "%s: expecting 'BW' at %08llx\n", input.c_str(),
             in.tellg() - start);
     return;
   }
 
   for (;;) {
-    if (magic(in) != 0x5742) {
+    if (magic(in) != "BW"_magic2) {
       break;
     }
 
@@ -55,7 +55,7 @@ void extract_chunks(const std::string &input) {
     }
   }
 
-  if (magic(in) != 0x5a4d) {
+  if (magic(in) != "MZ"_magic2) {
     fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(),
             in.tellg() - start);
     return;
