@@ -22,7 +22,8 @@ void extract_chunks(const std::string &input) {
   auto start = in.tellg();
 
   if (magic(in) != 0x5a4d) {
-    fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(), in.tellg() - start);
+    fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(),
+            in.tellg() - start);
     return;
   }
 
@@ -36,7 +37,8 @@ void extract_chunks(const std::string &input) {
   }
 
   if (magic(in) != 0x5742) {
-    fprintf(stderr, "%s: expecting 'BW' at %08llx\n", input.c_str(), in.tellg() - start);
+    fprintf(stderr, "%s: expecting 'BW' at %08llx\n", input.c_str(),
+            in.tellg() - start);
     return;
   }
 
@@ -54,7 +56,8 @@ void extract_chunks(const std::string &input) {
   }
 
   if (magic(in) != 0x5a4d) {
-    fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(), in.tellg() - start);
+    fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(),
+            in.tellg() - start);
     return;
   }
 
