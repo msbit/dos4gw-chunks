@@ -34,6 +34,7 @@ uint16_t magic(std::ifstream &stream) {
   auto position = stream.tellg();
   uint16_t magic;
   stream.read(reinterpret_cast<char *>(&magic), 2);
+  stream.clear();
   stream.seekg(position);
   return magic;
 }
@@ -96,6 +97,7 @@ void extract_mz(std::ifstream &in, std::ostream *out) {
 
   uint32_t size = cblp == 0 ? cp * 512 : ((cp - 1) * 512) + cblp;
 
+  in.clear();
   in.seekg(start);
 
   std::unique_ptr<char[]> chunk(new char[chunksize]);
@@ -120,6 +122,7 @@ void extract_bw(std::ifstream &in, std::ostream *out) {
   uint32_t size;
   in.read(reinterpret_cast<char *>(&size), 4);
 
+  in.clear();
   in.seekg(start);
 
   std::unique_ptr<char[]> chunk(new char[chunksize]);
@@ -140,6 +143,7 @@ void extract_mz_le(std::ifstream &in, std::ostream *out) {
     return;
   }
 
+  in.clear();
   in.seekg(start);
 
   std::unique_ptr<char[]> chunk(new char[chunksize]);
