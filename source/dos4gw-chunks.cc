@@ -7,9 +7,9 @@
 
 void extract_chunks(const std::string &);
 
-void extract_mz(std::ifstream &, std::ostream *);
-void extract_bw(std::ifstream &, std::ostream *);
-void extract_mz_le(std::ifstream &, std::ostream *);
+bool extract_mz(std::ifstream &, std::ostream *);
+bool extract_bw(std::ifstream &, std::ostream *);
+bool extract_mz_le(std::ifstream &, std::ostream *);
 
 std::string without_extension(const std::string &);
 
@@ -45,7 +45,7 @@ void extract_chunks(const std::string &input) {
   auto start = in.tellg();
 
   if (magic(in) != 0x5a4d) {
-    fprintf(stderr, "expecting 'MZ' at %08llx\n", in.tellg() - start);
+    fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(), in.tellg() - start);
     return;
   }
 
@@ -53,10 +53,13 @@ void extract_chunks(const std::string &input) {
 
   snprintf(trailer.get(), 13, ".%08llx.mz", in.tellg() - start);
   std::ofstream mz(base + trailer.get(), std::ios::binary);
-  extract_mz(in, &mz);
+  if (!extract_mz(in, &mz)) {
+    fprintf(stderr, "%s: not MZ\n", input.c_str());
+    return;
+  }
 
   if (magic(in) != 0x5742) {
-    fprintf(stderr, "expecting 'BW' at %08llx\n", in.tellg() - start);
+    fprintf(stderr, "%s: expecting 'BW' at %08llx\n", input.c_str(), in.tellg() - start);
     return;
   }
 
@@ -67,27 +70,31 @@ void extract_chunks(const std::string &input) {
 
     snprintf(trailer.get(), 13, ".%08llx.bw", in.tellg() - start);
     std::ofstream bw(base + trailer.get(), std::ios::binary);
-    extract_bw(in, &bw);
+    if (!extract_bw(in, &bw)) {
+      fprintf(stderr, "%s: not BW\n", input.c_str());
+      return;
+    }
   }
 
   if (magic(in) != 0x5a4d) {
-    fprintf(stderr, "expecting 'MZ' at %08llx\n", in.tellg() - start);
+    fprintf(stderr, "%s: expecting 'MZ' at %08llx\n", input.c_str(), in.tellg() - start);
     return;
   }
 
   snprintf(trailer.get(), 13, ".%08llx.le", in.tellg() - start);
   std::ofstream mz_le(base + trailer.get(), std::ios::binary);
-  extract_mz_le(in, &mz_le);
+  if (!extract_mz_le(in, &mz_le)) {
+    fprintf(stderr, "%s: not MZ/LE\n", input.c_str());
+  }
 }
 
-void extract_mz(std::ifstream &in, std::ostream *out) {
+bool extract_mz(std::ifstream &in, std::ostream *out) {
   auto start = in.tellg();
 
   uint16_t magic;
   in.read(reinterpret_cast<char *>(&magic), 2);
   if (magic != 0x5a4d) {
-    fprintf(stderr, "not MZ\n");
-    return;
+    return false;
   }
 
   uint16_t cblp;
@@ -106,16 +113,17 @@ void extract_mz(std::ifstream &in, std::ostream *out) {
     out->write(chunk.get(), in.gcount());
     size -= in.gcount();
   }
+
+  return true;
 }
 
-void extract_bw(std::ifstream &in, std::ostream *out) {
+bool extract_bw(std::ifstream &in, std::ostream *out) {
   auto start = in.tellg();
 
   uint16_t magic;
   in.read(reinterpret_cast<char *>(&magic), 2);
   if (magic != 0x5742) {
-    fprintf(stderr, "not BW\n");
-    return;
+    return false;
   }
 
   in.seekg(30, std::ios::cur);
@@ -131,16 +139,17 @@ void extract_bw(std::ifstream &in, std::ostream *out) {
     out->write(chunk.get(), in.gcount());
     size -= in.gcount();
   }
+
+  return true;
 }
 
-void extract_mz_le(std::ifstream &in, std::ostream *out) {
+bool extract_mz_le(std::ifstream &in, std::ostream *out) {
   auto start = in.tellg();
 
   uint16_t magic;
   in.read(reinterpret_cast<char *>(&magic), 2);
   if (magic != 0x5a4d) {
-    fprintf(stderr, "not MZ\n");
-    return;
+    return false;
   }
 
   in.clear();
@@ -151,6 +160,8 @@ void extract_mz_le(std::ifstream &in, std::ostream *out) {
     in.read(chunk.get(), chunksize);
     out->write(chunk.get(), in.gcount());
   } while (in.gcount() > 0);
+
+  return true;
 }
 
 std::string without_extension(const std::string &input) {
