@@ -70,6 +70,16 @@ bool extract_mz_le(std::ifstream &in, std::ostream *out) {
     return false;
   }
 
+  in.seekg(0x3c - (in.tellg() - start), std::ios_base::cur);
+  uint32_t lfanew;
+  in.read(reinterpret_cast<char *>(&lfanew), 4);
+
+  in.seekg(lfanew - (in.tellg() - start), std::ios_base::cur);
+  in.read(reinterpret_cast<char *>(&magic), 2);
+  if (magic != 0x454c) {
+    return false;
+  }
+
   in.clear();
   in.seekg(start);
 
